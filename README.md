@@ -1,6 +1,6 @@
 # Telegram-бот мониторинга агроклиматических параметров
 
-Бот получает данные с ESP32 (DHT11, датчик почвы, LCD 1602A) и отображает их в Telegram.
+Бот получает данные с ESP32 (DHT11, датчик почвы) и отображает их в Telegram.
 
 ## Быстрый старт
 
@@ -31,11 +31,12 @@ python main.py
 
 ### 3. Настройка ESP32
 
-Откройте `esp32/src/main.cpp` и измените:
+**Вариант A — через Render (сервер):**  
+`esp32/src/main.cpp` → `SERVER_URL`, `API_SECRET`
 
-- `SERVER_URL` — URL сервера (Render или локальный IP)
-- `API_SECRET` — должен совпадать с `.env`
-- `LCD_ADDR` — адрес I2C дисплея (0x27 или 0x3F)
+**Вариант B — автономно (без сервера):**  
+`esp32/src/main_standalone.cpp` → `BOT_TOKEN`, `ALLOWED_CHAT_ID`  
+Сборка: `pio run -e standalone`
 
 Соберите и загрузите прошивку через PlatformIO.
 

@@ -1,15 +1,14 @@
 /**
  * ESP32 — мониторинг агроклиматических параметров
- * DHT11, датчик почвы, LCD 1602A I2C
+ * DHT11, датчик почвы
  * Отправка данных на сервер Telegram-бота
  */
 
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <DHT.h>
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
 #include <time.h>
 
 // ============ НАСТРОЙКИ ============
@@ -20,41 +19,25 @@
 
 #define DHT_PIN 4
 #define SOIL_PIN 34
-#define MEASURE_INTERVAL 45000
-#define LCD_UPDATE_MS 2000
+#define MEASURE_INTERVAL 30000
 #define WIFI_RETRY_MS 5000
 #define SEND_REPORT_HOUR_1 8
 #define SEND_REPORT_HOUR_2 20
 
-// LCD I2C 1602A: SDA=GPIO21, SCL=GPIO22, адрес обычно 0x27 (или 0x3F)
-#define LCD_ADDR 0x27
-#define LCD_COLS 16
-#define LCD_ROWS 2
-
 // ============ ДАТЧИКИ ============
 #define DHT_TYPE DHT11
 DHT dht(DHT_PIN, DHT_TYPE);
-LiquidCrystal_I2C lcd(LCD_ADDR, LCD_COLS, LCD_ROWS);
 
 bool wifiWasConnected = false;
 unsigned long lastMeasure = 0;
-unsigned long lastLcdUpdate = 0;
 unsigned long lastReportSent = -1;
 bool dhtOk = true;
-bool lastSendOk = true;
 
 void setup() {
   Serial.begin(115200);
-  Wire.begin(21, 22);
   dht.begin();
 
-  lcd.init();
-  lcd.backlight();
-  lcd.setCursor(0, 0);
-  lcd.print("Online Greenhome");
-  lcd.setCursor(0, 1);
-  lcd.print("Starting...");
-
+  WiFi.setAutoReconnect(true);
   configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
   connectWiFi();
 }
@@ -67,8 +50,6 @@ void loop() {
       sendNotification("wifi_lost", "Соединение WiFi потеряно");
       wifiWasConnected = false;
     }
-    lcd.setCursor(0, 1);
-    lcd.print("WiFi...          ");
     delay(WIFI_RETRY_MS);
     connectWiFi();
     return;
@@ -80,11 +61,6 @@ void loop() {
   }
 
   unsigned long now = millis();
-
-  if (now - lastLcdUpdate >= LCD_UPDATE_MS) {
-    lastLcdUpdate = now;
-    updateLcd();
-  }
 
   if (now - lastMeasure >= MEASURE_INTERVAL) {
     lastMeasure = now;
@@ -102,32 +78,6 @@ void loop() {
   }
 
   delay(500);
-}
-
-void updateLcd() {
-  float t = dht.readTemperature();
-  float h = dht.readHumidity();
-  int soil = analogRead(SOIL_PIN);
-
-  lcd.setCursor(0, 0);
-  if (!isnan(t) && !isnan(h)) {
-    lcd.print("T:");
-    lcd.print(t, 1);
-    lcd.print((char)223);
-    lcd.print("C H:");
-    lcd.print(h, 0);
-    lcd.print("%  ");
-  } else {
-    lcd.print("DHT error    ");
-  }
-
-  lcd.setCursor(0, 1);
-  lcd.print("Soil:");
-  lcd.print(soil);
-  lcd.print(" W");
-  lcd.print(WiFi.status() == WL_CONNECTED ? "1" : "0");
-  lcd.print(" C");
-  lcd.print(lastSendOk ? "1  " : "0  ");
 }
 
 void connectWiFi() {
@@ -165,9 +115,13 @@ void sendSensorData() {
   temp = t;
   humidity = h;
 
+  WiFiClientSecure client;
+  client.setInsecure();
+
   HTTPClient http;
+  http.setTimeout(15000);
   String url = String(SERVER_URL) + "/api/sensors";
-  http.begin(url);
+  http.begin(client, url);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("X-API-Secret", API_SECRET);
 
@@ -181,22 +135,26 @@ void sendSensorData() {
   serializeJson(doc, body);
 
   int code = http.POST(body);
+  Serial.println("HTTP: " + String(code));
   http.end();
 
-  lastSendOk = (code == 200);
-  if (lastSendOk) {
+  if (code == 200) {
     Serial.println("OK: T=" + String(temp) + " H=" + String(humidity) + " Soil=" + String(soil));
   } else {
-    Serial.println("Ошибка: " + String(code));
+    Serial.println("Ошибка: " + String(code) + " (см. https)");
   }
 }
 
 void sendNotification(const char* type, const char* message) {
   if (WiFi.status() != WL_CONNECTED) return;
 
+  WiFiClientSecure client;
+  client.setInsecure();
+
   HTTPClient http;
+  http.setTimeout(10000);
   String url = String(SERVER_URL) + "/api/notification";
-  http.begin(url);
+  http.begin(client, url);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("X-API-Secret", API_SECRET);
 
@@ -206,6 +164,7 @@ void sendNotification(const char* type, const char* message) {
 
   String body;
   serializeJson(doc, body);
-  http.POST(body);
+  int code = http.POST(body);
+  Serial.println("Notify HTTP: " + String(code));
   http.end();
 }
