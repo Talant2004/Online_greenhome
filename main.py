@@ -1,4 +1,5 @@
 """Главный модуль — запуск бота, API и планировщика."""
+import asyncio
 import logging
 import threading
 
@@ -34,6 +35,9 @@ def main():
     bot = Bot(token=TELEGRAM_BOT_TOKEN)
     set_bot(bot)
 
+    asyncio.run(bot.delete_webhook(drop_pending_updates=True))
+    logger.info("Webhook сброшен, используется polling")
+
     application = (
         Application.builder()
         .token(TELEGRAM_BOT_TOKEN)
@@ -50,7 +54,10 @@ def main():
     flask_thread.start()
     logger.info(f"API слушает на http://{SERVER_HOST}:{SERVER_PORT}")
 
-    application.run_polling(allowed_updates=["message"])
+    application.run_polling(
+        allowed_updates=["message"],
+        drop_pending_updates=True,
+    )
 
 
 if __name__ == "__main__":
