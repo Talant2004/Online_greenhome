@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: online-greenhome
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 main.py
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: ALLOWED_CHAT_IDS
+        sync: false
+      - key: API_SECRET
+        sync: false

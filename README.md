@@ -66,7 +66,7 @@ python main.py
 
 1. **New → Web Service** → подключи репозиторий `Online_greenhome`
 2. **Build Command:** `pip install -r requirements.txt`
-3. **Start Command:** `python main.py`
+3. **Start Command:** `python3 main.py`
 4. **Environment Variables:**
    | Key | Value |
    |-----|-------|
