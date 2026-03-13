@@ -20,6 +20,9 @@ async def send_scheduled_report(context: ContextTypes.DEFAULT_TYPE):
 
 def setup_jobs(application):
     """Добавить задания в JobQueue бота."""
+    from config import ENABLE_SCHEDULED_REPORTS
+    if not ENABLE_SCHEDULED_REPORTS:
+        return
     job_queue = application.job_queue
     if job_queue:
         job_queue.run_daily(send_scheduled_report, time=time(hour=8, minute=0))

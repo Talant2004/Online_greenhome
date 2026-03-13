@@ -5,7 +5,6 @@ from config import API_SECRET, ALLOWED_CHAT_IDS
 from data_store import update as update_data, format_status
 from storage import save_measurement
 from bot_instance import get_bot
-from live_messages import get_all_chats, get_live, clear_live
 
 app = Flask(__name__)
 
@@ -41,21 +40,6 @@ def receive_sensors():
 
     update_data(temp, humidity, soil, light)
     save_measurement(temp, humidity, soil, light)
-
-    text = format_status()
-    bot = get_bot()
-    if bot:
-        for chat_id in get_all_chats():
-            msg_id = get_live(chat_id)
-            if msg_id:
-                try:
-                    bot.edit_message_text(
-                        chat_id=chat_id,
-                        message_id=msg_id,
-                        text=text,
-                    )
-                except Exception:
-                    clear_live(chat_id)
 
     return jsonify({"ok": True})
 

@@ -22,3 +22,4 @@ SERVER_PORT = int(os.getenv("PORT", os.getenv("SERVER_PORT", "5000")))
 DATA_FILE = os.getenv("DATA_FILE", "data/measurements.csv")
 # Задержка перед polling (сек) — на Render даёт время старому контейнеру завершиться
 BOT_START_DELAY = int(os.getenv("BOT_START_DELAY", "40"))
+ENABLE_SCHEDULED_REPORTS = os.getenv("ENABLE_SCHEDULED_REPORTS", "false").lower() == "true"
