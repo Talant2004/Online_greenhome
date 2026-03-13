@@ -66,15 +66,14 @@ python main.py
 ## Развёртывание на Render
 
 1. **New → Web Service** → подключи репозиторий `Online_greenhome`
-2. **Build Command:** `pip install --upgrade pip && pip install -r requirements.txt`
-3. **Start Command:** `bash start.sh`
-4. **Environment Variables:**
+2. **Settings → Environment:** смени **Python** на **Docker** (или создай сервис заново с **Docker**)
+3. **Environment Variables:**
    | Key | Value |
    |-----|-------|
    | TELEGRAM_BOT_TOKEN | твой_токен_от_BotFather |
    | ALLOWED_CHAT_IDS | -5198577449 |
    | API_SECRET | agro_secret_2026 |
-5. **Region:** Oregon (US West) | **Plan:** Free
+4. **Region:** Oregon (US West) | **Plan:** Free
 
 После деплоя получишь URL вида `https://online-greenhome.onrender.com`. Обнови в ESP32 `SERVER_URL` на этот адрес (вместо `http://192.168.1.100:5000`).
 
