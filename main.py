@@ -2,8 +2,9 @@
 import asyncio
 import logging
 import threading
+import time
 
-from config import TELEGRAM_BOT_TOKEN, SERVER_HOST, SERVER_PORT, ALLOWED_CHAT_IDS
+from config import TELEGRAM_BOT_TOKEN, SERVER_HOST, SERVER_PORT, ALLOWED_CHAT_IDS, BOT_START_DELAY
 from bot_handlers import cmd_start, cmd_status, cmd_data
 from bot_instance import set_bot
 from api import app as api_app
@@ -53,6 +54,11 @@ def main():
     flask_thread = threading.Thread(target=run_flask, daemon=True)
     flask_thread.start()
     logger.info(f"API слушает на http://{SERVER_HOST}:{SERVER_PORT}")
+
+    delay = BOT_START_DELAY
+    if delay > 0:
+        logger.info(f"Ожидание {delay} сек (завершение предыдущего инстанса)...")
+        time.sleep(delay)
 
     application.run_polling(
         allowed_updates=["message"],
