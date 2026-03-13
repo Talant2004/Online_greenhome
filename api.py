@@ -67,6 +67,20 @@ def receive_notification():
     return jsonify({"ok": True})
 
 
+@app.route("/")
+def index():
+    """Главная страница."""
+    return jsonify({
+        "service": "Online Greenhome",
+        "status": "ok",
+        "endpoints": {
+            "health": "/health",
+            "api_sensors": "POST /api/sensors",
+            "api_notification": "POST /api/notification",
+        },
+    })
+
+
 @app.route("/health", methods=["GET"])
 def health():
     """Проверка работоспособности."""
