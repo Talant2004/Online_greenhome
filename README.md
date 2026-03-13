@@ -1,6 +1,6 @@
 # Telegram-бот мониторинга агроклиматических параметров
 
-Бот получает данные с ESP32 (DHT11, BH1750, датчик почвы) и отображает их в Telegram.
+Бот получает данные с ESP32 (DHT11, датчик почвы, LCD 1602A) и отображает их в Telegram.
 
 ## Быстрый старт
 
@@ -33,8 +33,9 @@ python main.py
 
 Откройте `esp32/src/main.cpp` и измените:
 
-- `SERVER_URL` — IP-адрес ПК, где запущен бот (например `http://192.168.1.100:5000`)
-- `API_SECRET` — должен совпадать с значением в `.env`
+- `SERVER_URL` — URL сервера (Render или локальный IP)
+- `API_SECRET` — должен совпадать с `.env`
+- `LCD_ADDR` — адрес I2C дисплея (0x27 или 0x3F)
 
 Соберите и загрузите прошивку через PlatformIO.
 
@@ -65,8 +66,8 @@ python main.py
 ## Развёртывание на Render
 
 1. **New → Web Service** → подключи репозиторий `Online_greenhome`
-2. **Build Command:** `pip install -r requirements.txt`
-3. **Start Command:** `python3 main.py`
+2. **Build Command:** `pip install --upgrade pip && pip install -r requirements.txt`
+3. **Start Command:** `bash start.sh`
 4. **Environment Variables:**
    | Key | Value |
    |-----|-------|
