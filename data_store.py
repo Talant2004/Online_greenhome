@@ -37,13 +37,29 @@ def format_status() -> str:
     """Форматировать данные для сообщения."""
     data = get()
     if not data:
-        return "Данные ещё не получены от ESP32.\nОжидайте первое измерение."
+        return "📭 Данные ещё не получены от ESP32.\nОжидайте первое измерение."
 
-    return f"""Состояние системы
+    return f"""📊 Состояние системы
 
-Температура: {data.temperature} °C
-Влажность воздуха: {data.humidity} %
-Влажность почвы: {data.soil}
-Освещённость: {data.light} lux
+🌡 Температура: {data.temperature} °C
+💧 Влажность воздуха: {data.humidity} %
+🌱 Влажность почвы: {data.soil}
+💡 Освещённость: {data.light} lux
 
 Обновлено: {data.timestamp.strftime('%d.%m.%Y %H:%M:%S')}"""
+
+
+def format_temp() -> str:
+    """Только температура."""
+    data = get()
+    if not data:
+        return "📭 Нет данных"
+    return f"🌡 Температура: {data.temperature} °C"
+
+
+def format_soil() -> str:
+    """Только влажность почвы."""
+    data = get()
+    if not data:
+        return "📭 Нет данных"
+    return f"🌱 Влажность почвы: {data.soil}"

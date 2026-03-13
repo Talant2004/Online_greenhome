@@ -5,7 +5,7 @@ import threading
 import time
 
 from config import TELEGRAM_BOT_TOKEN, SERVER_HOST, SERVER_PORT, ALLOWED_CHAT_IDS, BOT_START_DELAY
-from bot_handlers import cmd_start, cmd_status, cmd_data
+from bot_handlers import cmd_start, cmd_status, cmd_data, cmd_live, cmd_temp, cmd_soil
 from bot_instance import set_bot
 from api import app as api_app
 from scheduler import setup_jobs
@@ -47,6 +47,9 @@ def main():
 
     application.add_handler(CommandHandler("start", cmd_start))
     application.add_handler(CommandHandler("status", cmd_status))
+    application.add_handler(CommandHandler("live", cmd_live))
+    application.add_handler(CommandHandler("temp", cmd_temp))
+    application.add_handler(CommandHandler("soil", cmd_soil))
     application.add_handler(CommandHandler("data", cmd_data))
 
     setup_jobs(application)
